@@ -365,10 +365,13 @@ function distill_distill_process_token($wrapper, $index, array $settings) {
  *       used to process the referenced entity.
  *     - include_fields: Array of fields => settings that should
  *       be extracted and returned fron referenced entity.
+ *     - identifier: flag to return only the entity ID specified
+ *       by EntityStructureWrapper::getIdentifier
  *
- * @return StdClass|array
+ *
+ * @return StdClass|array|string
  *   Field values as specified by include_fields and as extracted
- *   by specified processor class.
+ *   by specified processor class. Or the entity ID when identifier is set.
  */
 function distill_distill_process_entityreference($wrapper, $index, array $settings) {
   // Get entity info, and entity object from wrapper.
@@ -383,7 +386,10 @@ function distill_distill_process_entityreference($wrapper, $index, array $settin
   // Create an entity distiller.
   $distiller = new Distill($entity_info['type'], $entity, $settings['processor']);
 
-  if (isset($settings['include_fields']) && !empty($settings['include_fields'])) {
+  if (isset($settings['identifier']) && $settings['identifier'] && $wrapper instanceof EntityStructureWrapper) {
+    $result = $wrapper->getIdentifier();
+  }
+  else if (isset($settings['include_fields']) && !empty($settings['include_fields'])) {
     foreach ($settings['include_fields'] as $field_name => $field_settings) {
       // If no field settings were specified, use
       // field value instead of index as name.
@@ -393,12 +399,14 @@ function distill_distill_process_entityreference($wrapper, $index, array $settin
       }
       $distiller->setField($field_name, $field_settings);
     }
+    $result = $distiller->getFieldValues();
   }
   else {
     $distiller->setAllFields();
+    $result = $distiller->getFieldValues();
   }
 
-  return $distiller->getFieldValues();
+  return $result;
 }
 
 /**
