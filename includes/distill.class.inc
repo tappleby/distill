@@ -216,10 +216,34 @@ class Distill {
 
   /**
    * Adds all value of all fields on entity to the $this->values array.
+   *
+   * @param array $fields
+   *  Array of fields to include, leave empty for all. to set a property name use
+   *  a key in the array.
+   *
+   * @param array $settings
+   *  Array of settings keyed by field name.
    */
-  public function setAllFields() {
-    foreach ($this->entityWrapper->getPropertyInfo() as $field_name => $field) {
-      $this->setField($field_name);
+  public function setAllFields($fields=null, $settings=array()) {
+
+    if (!is_array($settings)) $settings = array();
+
+    if (empty($fields)) {
+      $fields = array_keys($this->entityWrapper->getPropertyInfo());
+    }
+
+    foreach ($fields as $field_name => $property_name) {
+      if (is_numeric($field_name)) {
+        $field_name = $property_name;
+      }
+
+      if (!empty($settings[$field_name])) {
+        $field_settings = $settings[$field_name];
+      } else {
+        $field_settings = array();
+      }
+
+      $this->setField($field_name, $property_name, $field_settings);
     }
   }
 
