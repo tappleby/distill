@@ -233,7 +233,7 @@ class Distill {
     }
 
     foreach ($fields as $field_name => $property_name) {
-      if (is_numeric($field_name)) {
+      if (is_int($field_name)) {
         $field_name = $property_name;
       }
 
